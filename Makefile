@@ -2,6 +2,16 @@
 CLANG ?= clang
 BPFTOOL ?= bpftool
 
+# Git version info (build fails if not available)
+GIT_REV := $(shell git rev-parse --short HEAD)
+GIT_DATE := $(shell git log -1 --format=%cI)
+ifeq ($(GIT_REV),)
+    $(error GIT_REV is not set - not in a git repository?)
+endif
+ifeq ($(GIT_DATE),)
+    $(error GIT_DATE is not set - not in a git repository?)
+endif
+
 # Output executable name
 APP = sigsegv_monitor
 
@@ -17,7 +27,7 @@ VMLINUX = vmlinux.h
 # Compiler flags
 # -g: Debug info (required for BTF)
 # -O2: Optimization (required for BPF)
-CFLAGS := -g -O2 -Wall
+CFLAGS := -g -O2 -Wall -DGIT_REV=\"$(GIT_REV)\" -DGIT_DATE=\"$(GIT_DATE)\"
 BPF_CFLAGS := -g -O2 -target bpf -D__TARGET_ARCH_x86
 
 # Libs to link
